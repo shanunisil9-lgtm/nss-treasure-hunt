@@ -1,1 +1,72 @@
-HELLO NSS
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NSS Treasure Hunt Scanner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></title>
+    <style>
+        body { font-family: Arial; text-align: center; padding: 20px; background: #1e3c72; color: white; }
+        input { width: 80%; padding: 15px; margin: 10px; border: none; border-radius: 10px; font-size: 18px; }
+        button { background: #00d4aa; color: white; border: none; padding: 15px 30px; font-size: 20px; border-radius: 10px; margin: 10px; }
+        #result { margin-top: 30px; padding: 20px; background: white; color: #333; border-radius: 10px; font-size: 18px; min-height: 100px; }
+        #qr-reader { width: 100%; max-width: 400px; margin: 20px auto; }
+    </style>
+</head>
+<body>
+    <h1>🏴‍☠️ NSS Treasure Hunt</h1>
+    
+    <input type="text" id="teamLeader" placeholder="Team Leader Name" required>
+    <input type="number" id="groupNumber" placeholder="Group Number" required>
+    
+    <br>
+    <button onclick="startScanner()">📱 Scan QR Code</button>
+    <button onclick="stopScanner()">Stop Scanner</button>
+    
+    <div id="qr-reader" style="display:none;"></div>
+    <div id="result"></div>
+
+    <script>
+        const html5QrCode = new Html5Qrcode("qr-reader");
+        let scanning = false;
+
+        function startScanner() {
+            const teamLeader = document.getElementById("teamLeader").value;
+            const groupNumber = document.getElementById("groupNumber").value;
+            
+            if (!teamLeader || !groupNumber) {
+                alert("Please enter Team Leader Name and Group Number!");
+                return;
+            }
+            
+            document.getElementById("qr-reader").style.display = "block";
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: {width: 250, height: 250} },
+                (decodedText) => {
+                    stopScanner();
+                    showResult(decodedText, teamLeader, groupNumber);
+                },
+                (error) => {}
+            ).catch(err => console.log("Scanner error:", err));
+        }
+
+        function stopScanner() {
+            html5QrCode.stop().then(() => {
+                document.getElementById("qr-reader").style.display = "none";
+            });
+        }
+
+        function showResult(clue, teamLeader, groupNumber) {
+            document.getElementById("result").innerHTML = `
+                <h2>✅ Scanned Successfully!</h2>
+                <p><strong>Team:</strong> ${teamLeader} (Group ${groupNumber})</p>
+                <p><strong>Clue:</strong></p>
+                <div style="background:#f0f0f0; color:#000; padding:15px; border-radius:10px; font-size:20px;">
+                    ${clue}
+                </div>
+                <br><button onclick="location.reload()">🔄 Scan Next</button>
+            `;
+        }
+    </script>
+</body>
+</html>
